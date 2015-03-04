@@ -8,7 +8,8 @@
 
 #import "MasterViewController.h"
 #import "DetailViewController.h"
-#import "ModelCell.h"
+#import "Model.h"
+#import "AB_KeyValueUpdater.h"
 
 @interface MasterViewController ()
 
@@ -77,8 +78,19 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    ModelCell *cell = (ModelCell*)[tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-    cell.item = self.items[indexPath.row];
+    Model* item = self.items[indexPath.row];    
+    
+    // if we reused cells, we would need to unbind and if we have mode instance we could unbind
+    // in more detailed way, but we just unbind everything for cell.
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
+    [cell unbindAll];
+    
+    // mapping keys are either strings interpreted as keyPaths or they are blocks called with the value as the
+    // single parameter.
+    [cell bindInitialObject:item mapping:@{@"summary":   @"detailTextLabel.text",
+                                           @"title": ^(NSString* text) {
+        cell.textLabel.text = [text uppercaseString];
+    }}];
     return cell;
 }
 

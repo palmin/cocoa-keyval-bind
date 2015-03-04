@@ -29,7 +29,7 @@
     [self.mapping removeAllObjects];
 }
 
--(void)addMapping:(NSString*)sourceKey targetKey:(NSString*)targetKey {
+-(void)addMapping:(NSString*)sourceKey targetKeyOrBlock:(id)targetKeyOrBlock {
     NSMutableArray* array = [self.mapping objectForKey:sourceKey];
     if(array == nil) {
         array = [NSMutableArray new];
@@ -37,15 +37,15 @@
 
         [self.observed addObserver:self forKeyPath:sourceKey options:0 context:NULL];
     }
-    [array addObject:targetKey];
+    [array addObject:targetKeyOrBlock];
 }
 
--(void)removeMapping:(NSString*)sourceKey targetKey:(NSString*)targetKey {
+-(void)removeMapping:(NSString*)sourceKey targetKeyOrBlock:(id)targetKeyOrBlock {
     // we know there is nothing to do when no existing mappings, and quit early to avoid edge conditions
     NSMutableArray* array = [self.mapping objectForKey:sourceKey];
     if(array.count == 0) return;
     
-    [array removeObjectIdenticalTo:targetKey];
+    [array removeObjectIdenticalTo:targetKeyOrBlock];
     if(array.count == 0) {
         // we want to stop observing the given key if nobody are listening
         [self.observed removeObserver:self forKeyPath:sourceKey];
@@ -60,8 +60,13 @@
     if(array.count == 0) return;
     
     id value = [object valueForKeyPath:keyPath];
-    for (NSString* targetKey in array) {
-        [self.target setValue:value forKeyPath:targetKey];
+    for (id keyOrBlock in array) {
+        if([keyOrBlock isKindOfClass:[NSString class]]) {
+            [self.target setValue:value forKeyPath:keyOrBlock];
+        } else {
+            void (^block)(id value) = keyOrBlock;
+            block(value);
+        }
     }
 }
 
@@ -89,10 +94,15 @@
     return self;
 }
 
--(void)dealloc {
+-(void)unbindAll {
     for (AB_KeyValueObserved* observed in observedObject.allValues) {
         [observed unobserve];
     }
+    [observedObject removeAllObjects];
+}
+
+-(void)dealloc {
+    [self unbindAll];
 }
 
 -(AB_KeyValueObserved*)observed:(id)object {
@@ -121,14 +131,18 @@
 }
 
 -(void)bindKey:(NSString*)sourceKey fromObject:(NSObject*)sourceObject
-         toKey:(NSString*)myKey target:(id)target {
+            to:(id)keyOrBlock target:(id)target {
     
     AB_KeyValueObserved* observed = [self ensureObserved:sourceObject target:target];
-    [observed addMapping:sourceKey targetKey:myKey];
+    [observed addMapping:sourceKey targetKeyOrBlock:keyOrBlock];
 }
 
--(void)unbindKey:(NSString*)sourceKey fromObject:(NSObject*)sourceObject toKey:(NSString*)myKey {
-    [[self observed:sourceObject] removeMapping:sourceKey targetKey:myKey];
+-(void)unbindKey:(NSString*)sourceKey fromObject:(NSObject*)sourceObject to:(id)keyOrBlock {
+    [[self observed:sourceObject] removeMapping:sourceKey targetKeyOrBlock:keyOrBlock];
+}
+
+-(void)unbindObject:(NSObject*)sourceObject  {
+    [[self observed:sourceObject] unobserve];
 }
 
 @end
@@ -152,17 +166,34 @@ static char associationObject;
 
 -(void)bindKey:(NSString*)sourceKey fromObject:(NSObject*)sourceObject toKey:(NSString*)myKey {
     [[self AB_ensureKeyValueUpdater] bindKey:sourceKey fromObject:sourceObject
-                                       toKey:myKey target:self];
+                                          to:myKey target:self];
+}
+
+-(void)bindKey:(NSString*)sourceKey fromObject:(NSObject*)sourceObject callback:(void (^)(id value))block {
+    [[self AB_ensureKeyValueUpdater] bindKey:sourceKey fromObject:sourceObject
+                                          to:block target:self];
 }
 
 -(void)unbindKey:(NSString*)sourceKey fromObject:(NSObject*)sourceObject toKey:(NSString*)myKey {
     [[self AB_keyValueUpdater] unbindKey:sourceKey fromObject:sourceObject toKey:myKey];
 }
 
+-(void)unbindObject:(NSObject*)sourceObject {
+    [[self AB_keyValueUpdater] unbindObject: sourceObject];
+}
+
+-(void)unbindAll {
+    [[self AB_keyValueUpdater] unbindAll];
+}
+
 -(void)bindObject:(NSObject*)sourceObject mapping:(NSDictionary*)mapping {
     for (NSString* sourceKey in mapping) {
-        NSString* myKey = [mapping objectForKey: sourceKey];
-        [self bindKey:sourceKey fromObject:sourceObject toKey:myKey];
+        id keyOrBlock = [mapping objectForKey: sourceKey];
+        if([keyOrBlock isKindOfClass:[NSString class]]) {
+            [self bindKey:sourceKey fromObject:sourceObject toKey:keyOrBlock];
+        } else {
+            [self bindKey:sourceKey fromObject:sourceObject callback:keyOrBlock];
+        }
     }
 }
 
@@ -177,9 +208,15 @@ static char associationObject;
     [self bindObject:sourceObject mapping:mapping];
     
     for (NSString* sourceKey in mapping) {
-        NSString* targetKey = [mapping objectForKey:sourceKey];
+        id keyOrBlock = [mapping objectForKey:sourceKey];
         id value = [sourceObject valueForKeyPath:sourceKey];
-        [self setValue:value forKeyPath:targetKey];
+
+        if([keyOrBlock isKindOfClass:[NSString class]]) {
+            [self setValue:value forKeyPath:keyOrBlock];
+        } else {
+            void (^block)(id value) = keyOrBlock;
+            block(value);
+        }
     }
 }
 

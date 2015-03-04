@@ -15,7 +15,6 @@
 		BEB95D151AA732C1007B8007 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BEB95D141AA732C1007B8007 /* Images.xcassets */; };
 		BEB95D2F1AA732E8007B8007 /* AB_KeyValueUpdater.m in Sources */ = {isa = PBXBuildFile; fileRef = BEB95D2E1AA732E8007B8007 /* AB_KeyValueUpdater.m */; };
 		BEB95D321AA733D7007B8007 /* Model.m in Sources */ = {isa = PBXBuildFile; fileRef = BEB95D311AA733D7007B8007 /* Model.m */; };
-		BEB95D351AA734AD007B8007 /* ModelCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BEB95D341AA734AD007B8007 /* ModelCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,8 +33,6 @@
 		BEB95D2E1AA732E8007B8007 /* AB_KeyValueUpdater.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AB_KeyValueUpdater.m; path = ../AB_KeyValueUpdater.m; sourceTree = "<group>"; };
 		BEB95D301AA733D7007B8007 /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
 		BEB95D311AA733D7007B8007 /* Model.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Model.m; sourceTree = "<group>"; };
-		BEB95D331AA734AD007B8007 /* ModelCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModelCell.h; sourceTree = "<group>"; };
-		BEB95D341AA734AD007B8007 /* ModelCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ModelCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,8 +75,6 @@
 				BEB95D0C1AA732C1007B8007 /* MasterViewController.m */,
 				BEB95D301AA733D7007B8007 /* Model.h */,
 				BEB95D311AA733D7007B8007 /* Model.m */,
-				BEB95D331AA734AD007B8007 /* ModelCell.h */,
-				BEB95D341AA734AD007B8007 /* ModelCell.m */,
 				BEB95D111AA732C1007B8007 /* Main.storyboard */,
 				BEB95D141AA732C1007B8007 /* Images.xcassets */,
 				BEB95D041AA732C1007B8007 /* Supporting Files */,
@@ -167,7 +162,6 @@
 				BEB95D0A1AA732C1007B8007 /* AppDelegate.m in Sources */,
 				BEB95D0D1AA732C1007B8007 /* MasterViewController.m in Sources */,
 				BEB95D2F1AA732E8007B8007 /* AB_KeyValueUpdater.m in Sources */,
-				BEB95D351AA734AD007B8007 /* ModelCell.m in Sources */,
 				BEB95D321AA733D7007B8007 /* Model.m in Sources */,
 				BEB95D071AA732C1007B8007 /* main.m in Sources */,
 				BEB95D101AA732C1007B8007 /* DetailViewController.m in Sources */,
